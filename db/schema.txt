@@ -1,0 +1,35 @@
+-- Table: nr_v2x.dev_info
+
+-- DROP TABLE IF EXISTS nr_v2x.dev_info;
+
+CREATE TABLE IF NOT EXISTS nr_v2x.dev_info
+(
+    index bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 0 MINVALUE 0 MAXVALUE 9223372036854775807 CACHE 1 ),
+    "timestamp" timestamp without time zone DEFAULT now(),
+    "devId" integer NOT NULL,
+    serial bigint,
+    name text COLLATE pg_catalog."default",
+    ip text COLLATE pg_catalog."default",
+    connection boolean,
+    latitude integer DEFAULT 0,
+    longitude integer DEFAULT 0,
+    elevation integer DEFAULT 0,
+    heading integer DEFAULT 0,
+    speed integer DEFAULT 0,
+    dop integer DEFAULT 0,
+    "connectedTime" timestamp without time zone,
+    "disconnectedTime" timestamp without time zone,
+    "devType" integer,
+    "subDevId_1" integer,
+    "subDevId_2" integer,
+    "subDevId_3" integer,
+    "subDevId_4" integer,
+    "gwIndex" integer,
+    "v2xType" integer DEFAULT 0,
+    "rfType" integer DEFAULT 0
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS nr_v2x.dev_info
+    OWNER to postgres;
