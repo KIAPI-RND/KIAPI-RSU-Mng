@@ -23,8 +23,8 @@ DEBUG = -O2 #-g
 OBJ ?= main.o core_service.o 
 OBJS = $(patsubst %,$(BDIR)/%,$(OBJ))             
 
-INCLUDE += -I $(INCDIR) -I ../../cpp-framework/include/ -I ../libnr-v2x/include/ -I ../../pq-utils/include/
-LIB ?= -L ../../cpp-framework/$(BDIR)/ -L ../libnr-v2x/$(BDIR)/ -L ../../pq-utils/$(BDIR) -lnr-v2x -lpq-utils -lcpp-framework -lpqxx -pthread
+INCLUDE += -I $(INCDIR) -I ../cpp-framework/include/ -I ../libnr-v2x/include/ -I ../pq-utils/include/
+LIB ?= -L ../cpp-framework/$(BDIR)/ -L ../libnr-v2x/$(BDIR)/ -L ../pq-utils/$(BDIR) -lnr-v2x -lpq-utils -lcpp-framework -lpqxx -pthread
   
 all : app
  
