@@ -20,9 +20,9 @@ thread(0,100)
 {
     
     this->config = config; 
-    v2x.add_dev_list(config.dev_list);  
-    v2x.set(config.is_server,config.ip,config.port);
-    v2x.set_debug(config.debug);
+    v2x.add_dev_list(config.dev_list);                  // libnrv2x 라이브러리 사용 부분 
+    v2x.set(config.is_server,config.ip,config.port);    // libnrv2x 라이브러리 사용 부분 
+    v2x.set_debug(config.debug);                        // libnrv2x 라이브러리 사용 부분 
       
     thread.start(this,&core_service::progress,nullptr); 
 }
@@ -138,7 +138,8 @@ void core_service::on_tx_msg_ext(nr_v2x_dev_info_t *dev, const v2x_parameter_fie
 void core_service::on_ftp_conn_req(nr_v2x_dev_info_t *dev, uint32_t psid, uint8_t unit_id, uint32_t link_id)
 {  
     log_print("core_service::on_ftp_conn_req");
-  
+
+    // libnrv2x 라이브러리 사용 부분
     bool res = v2x.request_tx_ftp_conn_res(dev->index, unit_id, link_id, config.ftp.ip, config.ftp.port, config.ftp.id, config.ftp.pw);
   
 } 
@@ -149,6 +150,8 @@ void core_service::update_dev_status(){
     for(int i = 0 ; i < config.dev_list.size() ; i++){
 
         int id = config.dev_list[i].dev_id;
+
+        // libnrv2x 라이브러리 사용 부분
         nr_v2x_dev_info_t *dev = v2x.get_dev_info(id);
 
         if (dev->fd < 0)
