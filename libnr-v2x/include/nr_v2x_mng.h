@@ -23,24 +23,27 @@
 #include <map>
 #include <vector>
  
- 
+
+// V2X 메시지 전송 Parameter 정의 
 typedef struct v2x_message_field
 {
     uint32_t psid;
     std::string data;
 } v2x_message_field_t;
-
+ 
+// V2X 송수신 메시지 Handler Parameter 정의
 typedef struct v2x_parameter_field
 {
 
-    uint32_t psid = 0;
+    uint32_t psid = 0;              
     uint64_t timestamp = 0;
     uint8_t cast_mode = 0;
-    int sender = -1; // 4byte hex..... filed
+    int sender = -1; // 4byte hex 
     int res = -1; // 알수 없음
     int data_size = -1;
     int dest = -1; // -1 = broadcast 
 
+    // V2X 송수신 RF 채널 정보
     struct v2x_params_t
     { 
         int8_t pwr = 20; // 20 dbm
@@ -51,6 +54,7 @@ typedef struct v2x_parameter_field
 
     } rf;
 
+    // V2X 수신 정보
     struct v2x_params_rx_t
     { 
         int pps = 0; 
@@ -61,7 +65,7 @@ typedef struct v2x_parameter_field
         nr_v2x_ext_status_modem_rx_t rx_info; 
         uint64_t throughput = 0;
     } rx;
-
+ 
     v2x_parameter_field(uint32_t psid = 0, int sender = -1)
     {
         this->timestamp = get_epoch_time_msec();
