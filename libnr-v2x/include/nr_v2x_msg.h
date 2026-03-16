@@ -17,48 +17,49 @@
 #define V2X_MCU_MAGIC_NUMBER 0x35475658  // 5GVX
 #define OVERALL_MAGIC_NUMBER 0x454D4F50  // EMOP
 
-typedef enum{ 
-    V2X_ACTION_TYPE_ADD = 0,
-    V2X_ACTION_TYPE_DELETE = 1,
-    V2X_ACTION_TYPE_DELETE_ALL = 2, 
-}v2x_action_type;
+typedef enum
+{
+    V2X_ACTION_TYPE_ADD = 0,        // V2X Device API ACTION (ADD) Type
+    V2X_ACTION_TYPE_DELETE = 1,     // V2X Device API ACTION (DELETE) Type
+    V2X_ACTION_TYPE_DELETE_ALL = 2, // V2X Device API ACTION (DELATE_ALL) Type
+} v2x_action_type;
 
 typedef enum
 {
-    V2X_COMM_TYPE_V2V = 0x01,
-    V2X_COMM_TYPE_V2I = 0x02,
-    V2X_COMM_TYPE_I2V = 0x03
+    V2X_COMM_TYPE_V2V = 0x01, // V2X Device API COMM Type (V2V)
+    V2X_COMM_TYPE_V2I = 0x02, // V2X Device API COMM Type (V2I)
+    V2X_COMM_TYPE_I2V = 0x03  // V2X Device API COMM Type (I2V)
 } v2x_comm_type;
 
 typedef enum
 {
-    V2X_UC_DEV_TYPE_OBU_MODEM_UINT = 10,
-    V2X_UC_DEV_TYPE_OBU_COMM_UINT = 11,
-    V2X_UC_DEV_TYPE_RSU_MODEM_UINT = 20,
-    V2X_UC_DEV_TYPE_RSU_COMM_UINT = 21,
-    V2X_UC_DEV_TYPE_RSU_CTL_UINT = 22
+    V2X_UC_DEV_TYPE_OBU_MODEM_UINT = 10, // OBU (MODEM)
+    V2X_UC_DEV_TYPE_OBU_COMM_UINT = 11,  // OBU (COMM)
+    V2X_UC_DEV_TYPE_RSU_MODEM_UINT = 20, // RSU (MODEM)
+    V2X_UC_DEV_TYPE_RSU_COMM_UINT = 21,  // RSU (COMM)
+    V2X_UC_DEV_TYPE_RSU_CTL_UINT = 22    // RSU Control Unit
 } v2x_uc_device_type;
 
 typedef enum{
-    V2X_UC_TX = 0x00,
+    V2X_UC_TX = 0x00,            
     V2X_UC_RX = 0x01
 }v2x_uc_tx_rx_type;
- 
+
 typedef enum
 {
-    NR_V2X_DEV_MSG_ACK = 0x0001,       // reserved
-    NR_V2X_DEV_MSG_NAK = 0x0002,       // reserved
-    NR_V2X_DEV_MSG_HEARTBEAT = 0x0003, // reserved
-    NR_V2X_DEV_MSG_TIME = 0x0004,      // reserved
-    NR_V2X_DEV_MSG_STATUS = 0x0005,    // reserved
-    NR_V2X_DEV_MSG_REPAIR = 0x0006,    // reserved
-    NR_V2X_DEV_MSG_CMD = 0x0007,       // reserved
-    NR_V2X_DEV_MSG_TX_MSG = 0x0010, 
-    NR_V2X_DEV_MSG_RX_MSG = 0x0011,
-    NR_V2X_DEV_MSG_WSR = 0x0012,
-    NR_V2X_DEV_MSG_WSC = 0x0013,
-    NR_V2X_DEV_MSG_FTP_CONN_REQ = 0xE380,
-    NR_V2X_DEV_MSG_FTP_CONN_RES = 0xE381
+    NR_V2X_DEV_MSG_ACK = 0x0001,          // reserved (현재 사용 X)
+    NR_V2X_DEV_MSG_NAK = 0x0002,          // reserved (현재 사용 X)
+    NR_V2X_DEV_MSG_HEARTBEAT = 0x0003,    // reserved (현재 사용 X)
+    NR_V2X_DEV_MSG_TIME = 0x0004,         // reserved (현재 사용 X)
+    NR_V2X_DEV_MSG_STATUS = 0x0005,       // reserved (현재 사용 X)
+    NR_V2X_DEV_MSG_REPAIR = 0x0006,       // reserved (현재 사용 X)
+    NR_V2X_DEV_MSG_CMD = 0x0007,          // reserved (현재 사용 X)
+    NR_V2X_DEV_MSG_TX_MSG = 0x0010,       // V2X Extensions 메시지 전송 요청 프로토콜 메시지 Type
+    NR_V2X_DEV_MSG_RX_MSG = 0x0011,       // V2X Extensions 메시지 수신 프로토콜 메시지 Type
+    NR_V2X_DEV_MSG_WSR = 0x0012,          // V2X Service Register Request 메시지 Type
+    NR_V2X_DEV_MSG_WSC = 0x0013,          // V2X Service Register Confirm 메시지 Type
+    NR_V2X_DEV_MSG_FTP_CONN_REQ = 0xE380, // V2X FTP 파일 업데이트 요청 메시지 Type
+    NR_V2X_DEV_MSG_FTP_CONN_RES = 0xE381  // V2X FTP 파일 업데이트 응답 메시지 Type
 } nr_v2x_mcu_msg_type;
 
 typedef enum
