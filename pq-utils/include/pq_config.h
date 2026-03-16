@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2025 Korea Intelligent Automotive Parts Promotion Institute (KIAPI). All rights reserved.
+ * Project :  KIAPI PQ-UTILS 
+ * Author: WooChang Seo (wcseo@kiapi.or.kr) 
+ * Date: 2025-08-29
+ */ 
 #ifndef _PQ_CONFIG_H_
 #define _PQ_CONFIG_H_
 

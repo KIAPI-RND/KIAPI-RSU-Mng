@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2025 Korea Intelligent Automotive Parts Promotion Institute (KIAPI). All rights reserved.
+ * Project : KIAPI 5G-NR-V2X
+ * Author: WooChang Seo (wcseo@kiapi.or.kr) 
+ * Date: 2025-08-29
+ */ 
+
 #ifndef _PG_HANDLER_H_
 #define _PG_HANDLER_H_
  
