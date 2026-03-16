@@ -76,21 +76,26 @@ typedef struct v2x_parameter_field
 }v2x_parameter_field_t;
 
 
+/// @brief V2X 메시지 핸들러 클래스 정의 
+/// 해당 클래스는 연결되는 V2X 장치 1대에 대한 연결 커넥션 수 만큼 내부 Handler가 관리되어 동작함
+/// 클래스 내부 각 장치로부터 메시지 수신 또는 전송에 대한 응답 및 결과가 자동으로 실행되도록 이벤트 핸들러 코드가 포함됨
+/// nr_v2X_mnsg_handler을 상속받은 상위클래스에서 이벤트 호출을 재정의(Overwrite)하여 호출되는 이벤트를 구현 필요함
 class nr_v2x_mng_handler{
 
 public:
-  
+    // 장치 연결 / 해제 이벤트
     virtual bool on_dev_connection(nr_v2x_dev_info_t *dev, const std::string &ip, uint32_t port, bool connection) = 0;
-
+    // V2X 메시지(J2735) 메시지 수신 처리 이벤트 호출 코드
     virtual void on_rx_msg(nr_v2x_dev_info_t *dev, const v2x_parameter_field_t &param, const std::string &msg) = 0;
+    // V2X Extensions 메시지 수신 처리 이벤트 호출 코드
     virtual void on_rx_msg_ext(nr_v2x_dev_info_t *dev, const v2x_parameter_field_t &param, const std::vector<v2x_message_field_t> &msg, const std::vector<nr_v2x_ext_status_msg_field_t> &status) = 0;
-
+    // V2X 메시지(J2735) 메시지 전송 응답 호출 코드 (전송 후, 전송 결과 처리 시 사용)
     virtual void on_tx_msg(nr_v2x_dev_info_t *dev, const v2x_parameter_field_t &param, const std::string &msg) = 0;
+    // V2X Extensions 메시지 수신 처리 이벤트 호출 코드 (전송 후, 전송 결과 처리 시 사용)
     virtual void on_tx_msg_ext(nr_v2x_dev_info_t *dev, const v2x_parameter_field_t &param, const std::vector<v2x_message_field_t> &msg,
                                const std::vector<nr_v2x_ext_status_msg_field_t> &status) = 0;
-    
-    virtual void on_ftp_conn_req(nr_v2x_dev_info_t *dev, uint32_t psid, uint8_t unit_id, uint32_t link_id) = 0; 
-
+    // FTP 업데이트 정보 요청 이벤트 호출
+    virtual void on_ftp_conn_req(nr_v2x_dev_info_t *dev, uint32_t psid, uint8_t unit_id, uint32_t link_id) = 0;
 };
 
 class nr_v2x_mng : public sock_handler_event{
