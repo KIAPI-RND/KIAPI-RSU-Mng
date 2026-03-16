@@ -1,0 +1,185 @@
+/*
+ * Copyright (c) 2025 Korea Intelligent Automotive Parts Promotion Institute (KIAPI). All rights reserved.
+ * Project : KIAPI 5G-NR-V2X
+ * Author: WooChang Seo (wcseo@kiapi.or.kr) 
+ * Date: 2025-08-29
+ */ 
+
+
+#ifndef _MCU_CONNECTION_H_
+#define _MCU_CONNECTION_H_
+
+#include <cpp-framework/sock/sock_handler.hpp> 
+#include <cpp-framework/thread/thread_handler.h> 
+#include <cpp-framework/common/time.h>
+#include <nmeaparse/nmea.h>
+
+#include <nr-v2x/nr_v2x_conf.h>
+#include <nr-v2x/tlvc_msg.h>
+#include <nr-v2x/nr_v2x_msg.h>
+#include <nr-v2x/nr_pps_mng.h>
+#include <nr-v2x/nr_v2x_ext_msg.h>
+
+#include <map>
+#include <vector>
+ 
+ 
+typedef struct v2x_message_field
+{
+    uint32_t psid;
+    std::string data;
+} v2x_message_field_t;
+
+typedef struct v2x_parameter_field
+{
+
+    uint32_t psid = 0;
+    uint64_t timestamp = 0;
+    uint8_t cast_mode = 0;
+    int sender = -1; // 4byte hex..... filed
+    int res = -1; // 알수 없음
+    int data_size = -1;
+    int dest = -1; // -1 = broadcast 
+
+    struct v2x_params_t
+    { 
+        int8_t pwr = 20; // 20 dbm
+        uint16_t freq = 5915;  // old 5885;
+        uint8_t bw = 20;           // Band 10Mhz , 20Mhz
+        uint8_t scs = 30;          // Subcarrier spacing [15, 30, 60] (kHz)
+        uint8_t pssch_mcs_idx = 0; // MCS index [7..6] , [5..0]
+
+    } rf;
+
+    struct v2x_params_rx_t
+    { 
+        int pps = 0; 
+        uint8_t rcpi = 0; 
+        bool tx_info_set = false;
+        bool rx_info_set = false;
+        nr_v2x_ext_status_modem_tx_t tx_info;
+        nr_v2x_ext_status_modem_rx_t rx_info; 
+        uint64_t throughput = 0;
+    } rx;
+
+    v2x_parameter_field(uint32_t psid = 0, int sender = -1)
+    {
+        this->timestamp = get_epoch_time_msec();
+        this->psid = psid;
+        this->sender = sender;
+    }
+
+}v2x_parameter_field_t;
+
+
+class nr_v2x_mng_handler{
+
+public:
+  
+    virtual bool on_dev_connection(nr_v2x_dev_info_t *dev, const std::string &ip, uint32_t port, bool connection) = 0;
+
+    virtual void on_rx_msg(nr_v2x_dev_info_t *dev, const v2x_parameter_field_t &param, const std::string &msg) = 0;
+    virtual void on_rx_msg_ext(nr_v2x_dev_info_t *dev, const v2x_parameter_field_t &param, const std::vector<v2x_message_field_t> &msg, const std::vector<nr_v2x_ext_status_msg_field_t> &status) = 0;
+
+    virtual void on_tx_msg(nr_v2x_dev_info_t *dev, const v2x_parameter_field_t &param, const std::string &msg) = 0;
+    virtual void on_tx_msg_ext(nr_v2x_dev_info_t *dev, const v2x_parameter_field_t &param, const std::vector<v2x_message_field_t> &msg,
+                               const std::vector<nr_v2x_ext_status_msg_field_t> &status) = 0;
+    
+    virtual void on_ftp_conn_req(nr_v2x_dev_info_t *dev, uint32_t psid, uint8_t unit_id, uint32_t link_id) = 0; 
+
+};
+
+class nr_v2x_mng : public sock_handler_event{
+
+public: 
+    nr_v2x_mng(nr_v2x_dev_type_t type,  nr_v2x_mng_handler *container = nullptr , int id = 0); 
+    ~nr_v2x_mng();
+    
+    void set_debug(bool set);
+    bool available(int index = 0);
+    void set_ettifos_direct_mode(int index = 0); 
+    void set_crc_enable(int index, bool set);  
+
+    bool add_dev_list(std::vector<nr_v2x_dev_info_t> dev); 
+    bool set(bool server, const std::string &ip, uint32_t port);
+    void set_position(int index, nmea::GPSFix fix);
+    bool get_position(int index, nmea::GPSFix &out);
+    void set_dev_id(int index, uint32_t id);
+    void set_rtt_option(int index, bool set, uint32_t size = 100, uint32_t interval = 1000, bool ext = true, uint32_t tansmit_per_period = 2, bool burst_mode = false);
+    int get_cnt();
+ 
+ 
+    nr_v2x_dev_info_t* get_dev_info(int index = 0, bool lock = false);
+
+    int wait_response(nr_v2x_dev_info_t *dev,const std::string &msg, uint32_t id, uint32_t timeout_msec = 1000);
+    int request_wsm_service(int index, v2x_action_type action, uint32_t psid);
+
+    int request_tx_fixed_msg(int index, v2x_parameter_field_t param, const std::string &msg);
+    int request_tx_extensible_msg(int index, v2x_parameter_field_t param, uint32_t sub_msg_type, const std::string &msg , bool add_status = false,  int target = -1); 
+    int request_tx_rtt_msg(int index, uint32_t psid, uint32_t dev_id, uint32_t dev_type, uint32_t seq,uint32_t interval, uint32_t size, bool bust_mode = false , double lat = 0.0, double lon = 0.0, double elev = 0.0, double speed = 0.0, double heading = 0.0, int dop = 0);
+    int request_tx_rtt_ack_msg(int index,uint32_t psid, const nr_v2x_rtt_base_msg_t &base);
+    int request_tx_extensible_rx_msg(int index, uint8_t ver, uint8_t rcpi,const v2x_parameter_field_t &param, const std::vector<v2x_message_field_t> &msg, const std::vector<nr_v2x_ext_status_msg_field_t> &status);
+    int request_tx_ftp_conn_res(int index, uint8_t unit_id, uint32_t link_id, const std::string &ip,uint16_t port,const std::string &id, const std::string pw);
+
+
+protected:
+    int on_sock_receive(int index, io_struct &sock);
+    int on_sock_connection(int index, io_struct &sock, bool connected); 
+private:
+   
+    bool build_dev_info();
+    bool add_remote_dev(int index);
+    std::string parse_msg(const std::string &buffer);
+    int reg_dev_connection(int index, io_struct &sock);
+    int unreg_dev_connection(int index, io_struct &sock);
+    bool progress_v2x_msg(io_struct &sock, const std::string &msg);
+    bool crc_check(const std::string &msg);
+    uint16_t crc_get(const std::string &msg);
+
+    int parse_tlvc_data(const std::string &msg, tlvc_msg_t &out, bool crc_check_enable = true);
+    // nr_v2x_ext_status_msg_field_t build_ext_status(std::string &out, uint8_t device_type, uint8_t tx_rx,uint32_t device_id,uint16_t hw_ver,uint16_t sw_ver,uint64_t timestamp);
+
+    bool on_rx_wsc(uint64_t timestamp, nr_v2x_dev_info_t *user, const std::string &msg);
+    bool on_rx_msg(uint64_t timestamp, nr_v2x_dev_info_t *user, const std::string &msg);
+    bool on_rx_tx_msg(uint64_t timestamp,nr_v2x_dev_info_t *user, const std::string &msg);
+    bool on_rx_ftp_conn_req(uint64_t timestamp,nr_v2x_dev_info_t *user, const std::string &msg);
+
+    bool on_rx_v2x_msg_fixed(nr_v2x_dev_info_t *user,  v2x_parameter_field param , const std::string &payload);
+    bool on_rx_v2x_msg_extensible(nr_v2x_dev_info_t *user, v2x_parameter_field param, const std::string &payload);
+ 
+    // nr_v2x_ext_status_msg_field_t parse_status_field(int index, const std::string &status_msg);
+ 
+    bool running = false;
+    nr_v2x_mng_handler *container = nullptr;  
+    nr_v2x_config_t config; 
+    sock_handler sock; 
+    std::map<int,std::shared_ptr<sock_handler>> remote;
+
+    bool debug = false;
+
+    struct dev_info_t
+    {
+        std::mutex lock;
+        int index = -1;
+        std::map<std::string, uint32_t> reg_ip_list;
+        std::map<uint32_t, nr_v2x_dev_info_t> data;
+    } dev;
+   
+    nr_pps_mng pps; 
+    thread_handler thread;
+    thread_handler scheduler; 
+
+    uint32_t progress_transmit_rtt(); 
+    uint32_t progress_scheduler(); 
+
+    void progress(void *argv);
+ 
+    tick_timer debug_tick;
+    
+
+};
+
+ 
+
+
+#endif
