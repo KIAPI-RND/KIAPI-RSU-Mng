@@ -94,6 +94,9 @@ typedef enum
 
 } nr_v2x_psid_list_t;
 
+
+
+/// @brief NR_V2X 장치 TCP 메시지 프로토콜 헤더 규격 정의
 struct nr_v2x_msg_header_t
 {
     BE<uint32_t> magic_number;
@@ -102,18 +105,21 @@ struct nr_v2x_msg_header_t
     BE<uint16_t> payload_id;
 } __attribute__((packed));
 
+/// @brief WSR 메시지 프레임 규격
 struct nr_v2x_wsr_t{
     nr_v2x_msg_header_t header;
     uint8_t action;
     BE<uint32_t> psid;
 }__attribute__((packed));
  
+/// @brief WSC 메시지 프레임 규격 
 struct nr_v2x_wsc_t{
     nr_v2x_msg_header_t header;
     uint8_t action_result;
     BE<uint32_t> psid;
 }__attribute__((packed)); 
 
+/// @brief FTP 업데이트 요청 메시지 규격 
 struct nr_v2x_ftp_con_req_t{ 
     nr_v2x_msg_header_t header;   
     BE<uint32_t> psid;  // psid 58240
@@ -121,6 +127,7 @@ struct nr_v2x_ftp_con_req_t{
     BE<uint32_t> link_id;
 }__attribute__((packed));
  
+/// @brief FTP 업데이트 응답 메시지 규격 
 struct nr_v2x_ftp_con_res_t{ 
     nr_v2x_msg_header_t header;   
     BE<uint32_t> psid;  // psid 58240
@@ -131,13 +138,17 @@ struct nr_v2x_ftp_con_res_t{
     uint8_t id_password[]; // null terminated string (0x00) 
 }__attribute__((packed));
  
+
+/// @brief V2X Extensions 메시지 전송 요청 메시지 프레임 규격 
+/// 전송 대상 메시지는 메시지 규격 내 포함된 message가 실제 V2X로 전송됨
 struct nr_v2x_tx_msg_t
 {
     nr_v2x_msg_header_t header;
     BE<uint32_t> psid;
     uint8_t message[];
 } __attribute__((packed));
- 
+  
+/// @brief 자체 IP Direct 통신에 사용하는 메시지 프레임 규격
 struct nr_v2x_ettifos_tx_msg_t{
 
     nr_v2x_msg_header_t header;
@@ -152,7 +163,8 @@ struct nr_v2x_ettifos_tx_msg_t{
     // 뒤에 CRC 있음 하지만 0000 임
 
 } __attribute__((packed));
- 
+  
+/// @brief V2X 메시지 수신 프로토콜에 따른 수신 메시지 규격
 struct nr_v2x_rx_msg_t
 {
     nr_v2x_msg_header_t header;
@@ -160,7 +172,8 @@ struct nr_v2x_rx_msg_t
     uint8_t rcpi;
     uint8_t message[];
 } __attribute__((packed));
-
+ 
+/// @brief 자체 IP Direct 통신에 사용하는 V2X 수신 프로토콜에 따른 메시지 규격 
 struct nr_v2x_ettifos_rx_msg_t
 {
     nr_v2x_msg_header_t header;
@@ -175,6 +188,7 @@ struct nr_v2x_ettifos_rx_msg_t
 
 } __attribute__((packed));
 
+/// @brief V2X 메시지 규격의 Extensionis Message 프레임 규격 (version 1)
 struct nr_v2x_ext_msg_overall_package_v1_t
 {
     BE<uint32_t> tag;
@@ -185,7 +199,8 @@ struct nr_v2x_ext_msg_overall_package_v1_t
     BE<uint16_t> pack_len;
     BE<uint16_t> crc;
 }__attribute__((packed)); 
-
+ 
+/// @brief V2X 메시지 규격의 Extensionis Message 프레임 규격 (version 2)
 struct nr_v2x_ext_msg_overall_package_v2_t
 {
     BE<uint32_t> tag;
@@ -197,7 +212,8 @@ struct nr_v2x_ext_msg_overall_package_v2_t
     uint8_t target;
     BE<uint16_t> crc;
 }__attribute__((packed));
-  
+   
+/// @brief V2X 메시지 규격의 Extensionis Message, Modem 기본 정보 정의 
 struct nr_v2x_ext_status_modem_base_data_t{ 
     uint8_t uc_device_type;
     uint8_t uc_tx_rx;
@@ -206,7 +222,8 @@ struct nr_v2x_ext_status_modem_base_data_t{
     BE<uint16_t> us_sw_ver;
     BE<uint64_t> us_timestamp;  
 }__attribute__((packed));
-
+ 
+/// @brief V2X 메시지 규격의 Extensionis Message 전송장치 Modem부 프레임 규격 
 struct nr_v2x_ext_status_modem_tx_t
 { 
     nr_v2x_ext_status_modem_base_data_t base;
@@ -221,7 +238,8 @@ struct nr_v2x_ext_status_modem_tx_t
     uint8_t peri_temp; 
 
 } __attribute__((packed));
-
+ 
+/// @brief V2X 메시지 규격의 Extensionis Message  수신장치 Modem부 프레임 규격 
 struct nr_v2x_ext_status_modem_rx_t
 {
     nr_v2x_ext_status_modem_base_data_t base;
@@ -232,7 +250,8 @@ struct nr_v2x_ext_status_modem_rx_t
     uint8_t cpu_temp;
     uint8_t peri_temp;
 }__attribute__((packed));
-
+ 
+/// @brief V2X 메시지 규격의 Extensionis Message, 통신부 장치 정보
 struct nr_v2x_ext_status_comm_tx_t
 {
     nr_v2x_ext_status_modem_base_data_t base;
@@ -240,11 +259,11 @@ struct nr_v2x_ext_status_comm_tx_t
     uint8_t peri_temp; 
 }__attribute__((packed));
  
-typedef nr_v2x_ext_status_comm_tx_t nr_v2x_ext_status_comm_rx_t;
+typedef nr_v2x_ext_status_comm_tx_t nr_v2x_ext_status_comm_rx_t; // 구조체 재정의 (수신 장치 통신부 정보)
 
-typedef nr_v2x_ext_status_comm_tx_t nr_v2x_ext_status_ctl_tx_t;
+typedef nr_v2x_ext_status_comm_tx_t nr_v2x_ext_status_ctl_tx_t; // 구조체 재정의 (전송 장치 제어부 정보)
 
-typedef nr_v2x_ext_status_comm_tx_t nr_v2x_ext_status_ctl_rx_t;
+typedef nr_v2x_ext_status_comm_tx_t nr_v2x_ext_status_ctl_rx_t; // 구조체 재정의 (수신 장치 제어부 정보)
 
 struct nr_v2x_ext_status_msg_field_t{
     // uint32_t msg_id;
@@ -264,17 +283,7 @@ struct nr_v2x_ext_status_msg_field_t{
     nr_v2x_ext_status_modem_rx_t modem_rx;
     nr_v2x_ext_status_comm_tx_t common;
 };
-
-
-
-
-
-
-
-
-
-
-
+ 
 nr_v2x_ext_status_msg_field_t build_ext_status(std::string &out, uint8_t device_type, uint8_t tx_rx, uint32_t device_id, uint16_t hw_ver, uint16_t sw_ver, uint64_t timestamp);
 nr_v2x_ext_status_msg_field_t parse_status_field(int index, const std::string &status_msg);
 
