@@ -98,38 +98,52 @@ public:
     virtual void on_ftp_conn_req(nr_v2x_dev_info_t *dev, uint32_t psid, uint8_t unit_id, uint32_t link_id) = 0;
 };
 
+
+/// @brief V2X 장치 Handler Class
+/// V2X 장치에 대한 기능과 데이터, 인터페이스를 처리하기위한 Class 정의 
+/// TCP 통신으로 연결된 5G-NR RSU 또는 OBU 장치를 비롯하여 각 장치마다 접속을 관리하고 이벤트 호출 등 관리
 class nr_v2x_mng : public sock_handler_event{
 
 public: 
     nr_v2x_mng(nr_v2x_dev_type_t type,  nr_v2x_mng_handler *container = nullptr , int id = 0); 
     ~nr_v2x_mng();
-    
-    void set_debug(bool set);
-    bool available(int index = 0);
-    void set_ettifos_direct_mode(int index = 0); 
-    void set_crc_enable(int index, bool set);  
 
-    bool add_dev_list(std::vector<nr_v2x_dev_info_t> dev); 
-    bool set(bool server, const std::string &ip, uint32_t port);
-    void set_position(int index, nmea::GPSFix fix);
-    bool get_position(int index, nmea::GPSFix &out);
-    void set_dev_id(int index, uint32_t id);
-    void set_rtt_option(int index, bool set, uint32_t size = 100, uint32_t interval = 1000, bool ext = true, uint32_t tansmit_per_period = 2, bool burst_mode = false);
-    int get_cnt();
- 
- 
-    nr_v2x_dev_info_t* get_dev_info(int index = 0, bool lock = false);
+    void set_debug(bool set);                    // SET : 디버그 메시지 활성/비활성
+    bool available(int index = 0);               // GET : 장치 활성 유무 상태 플래그
+    void set_ettifos_direct_mode(int index = 0); // SET : 자체 IP Direct 통신 활성
+    void set_crc_enable(int index, bool set);    // SET : CRC Check 활성 / 비활성
 
-    int wait_response(nr_v2x_dev_info_t *dev,const std::string &msg, uint32_t id, uint32_t timeout_msec = 1000);
-    int request_wsm_service(int index, v2x_action_type action, uint32_t psid);
+    bool add_dev_list(std::vector<nr_v2x_dev_info_t> dev);       // TCP 서버로 동작하는 경우, 하위 접속 Client 장치 정보 입력 
+    bool set(bool server, const std::string &ip, uint32_t port); // 서비스 활성
+    void set_position(int index, nmea::GPSFix fix);  // 연결 장치 위치 정보 갱신 
+    bool get_position(int index, nmea::GPSFix &out); // 연결 장치 위치 정보 수신
+    void set_dev_id(int index, uint32_t id);         // 연결 장치 Device ID 정보 설정
+    void set_rtt_option(int index, bool set, uint32_t size = 100, uint32_t interval = 1000,
+                        bool ext = true, uint32_t tansmit_per_period = 2, bool burst_mode = false); // RTT 전송 정보 설정 
+    int get_cnt(); // 송수신 메시지 수 정보 조회
 
+    nr_v2x_dev_info_t *get_dev_info(int index = 0, bool lock = false); // 장치 정보 저장 구조체 조회(Pointer)
+
+    int wait_response(nr_v2x_dev_info_t *dev,const std::string &msg, uint32_t id, uint32_t timeout_msec = 1000); // 프로토콜 메시지 명령 실행부  
+    int request_wsm_service(int index, v2x_action_type action, uint32_t psid); // WSM 서비스 요청 프로세스 실행
+
+    // J2735 메시지 전송 요청  
     int request_tx_fixed_msg(int index, v2x_parameter_field_t param, const std::string &msg);
-    int request_tx_extensible_msg(int index, v2x_parameter_field_t param, uint32_t sub_msg_type, const std::string &msg , bool add_status = false,  int target = -1); 
-    int request_tx_rtt_msg(int index, uint32_t psid, uint32_t dev_id, uint32_t dev_type, uint32_t seq,uint32_t interval, uint32_t size, bool bust_mode = false , double lat = 0.0, double lon = 0.0, double elev = 0.0, double speed = 0.0, double heading = 0.0, int dop = 0);
-    int request_tx_rtt_ack_msg(int index,uint32_t psid, const nr_v2x_rtt_base_msg_t &base);
-    int request_tx_extensible_rx_msg(int index, uint8_t ver, uint8_t rcpi,const v2x_parameter_field_t &param, const std::vector<v2x_message_field_t> &msg, const std::vector<nr_v2x_ext_status_msg_field_t> &status);
-    int request_tx_ftp_conn_res(int index, uint8_t unit_id, uint32_t link_id, const std::string &ip,uint16_t port,const std::string &id, const std::string pw);
+    // Extensions 메시지 전송 요청
+    int request_tx_extensible_msg(int index, v2x_parameter_field_t param, uint32_t sub_msg_type, const std::string &msg,
+                                  bool add_status = false, int target = -1);
+    // RTT 메시지 전송 요청 
+    int request_tx_rtt_msg(int index, uint32_t psid, uint32_t dev_id, uint32_t dev_type, uint32_t seq, uint32_t interval,
+                           uint32_t size, bool bust_mode = false, double lat = 0.0, double lon = 0.0, double elev = 0.0, double speed = 0.0, double heading = 0.0, int dop = 0);
+    // RTT Ack 메시지 전송 요청
+    int request_tx_rtt_ack_msg(int index, uint32_t psid, const nr_v2x_rtt_base_msg_t &base);
+    // Extensions 메시지 수신 결과 전송 요청 (일반적 사용 X) 
+    int request_tx_extensible_rx_msg(int index, uint8_t ver, uint8_t rcpi, const v2x_parameter_field_t &param,
+                                     const std::vector<v2x_message_field_t> &msg, const std::vector<nr_v2x_ext_status_msg_field_t> &status);
 
+    // FTP 업데이트 접속 요청에 대한 응답 메시지 전송
+    int request_tx_ftp_conn_res(int index, uint8_t unit_id, uint32_t link_id, const std::string &ip, uint16_t port,
+                                const std::string &id, const std::string pw);
 
 protected:
     int on_sock_receive(int index, io_struct &sock);
